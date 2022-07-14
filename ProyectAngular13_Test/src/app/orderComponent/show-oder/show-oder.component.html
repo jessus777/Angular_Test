@@ -1,0 +1,497 @@
+
+<br>
+<br>
+<div class="shadow-lg p-3 mb-5 rounded">
+    <div class="card shadow p-3 mb-5 rounded">
+        <div class="card-header"> 
+            <strong>new Order #{{orderNumber}}</strong> 
+        </div>
+        <div class="card-body">
+            <br>
+            <div class="row"> 
+
+                <div class="col-md-12 mb-3" *ngIf="successAddOrder else messageAddOrder">
+                    <a  class="btn btn-outline-primary shadow-sm rounded" tabindex="-1" role="button" aria-disabled="true" (click)="showSelectedProducts()"> <i class="bi bi-plus-circle-fill"> </i> Add Products</a>
+                </div> 
+                <ng-template #messageAddOrder>
+                    <div class="col-md-12 mb-3">
+                        <a  class="btn btn-outline-primary shadow-sm rounded" tabindex="-1" role="button" aria-disabled="true" (click)="addOrderNew(orderNumber)"> <i class="bi bi-cart-check-fill"> </i> New Order</a>
+                    </div>                    
+                </ng-template>
+
+                <br>
+                <br>
+                <div class="row text-center" *ngIf="showProductSelected else ProductSelected">
+                    <div class="col align-self-center">
+                        <label for="validationDefault04" class="form-label">Products</label>
+                        <select  class="form-select"  #mySelect (change)='onOptionsSelected($event)' > <!--ngModel (ngModelChange)="onCountryChanged($event)-->
+                            <option selected [ngValue]="null" disabled>Choose..</option>
+                            <option *ngFor="let product of productExistents" [ngValue]="product.id">{{product.name}}</option>
+                          </select>
+                    </div> 
+                </div>
+                <ng-template #ProductSelected>
+                    
+                </ng-template>
+                <div class="col-md-12" *ngIf="showAddOrderDetail">
+                    <br>
+                    <br>
+                    <table class="table table-responsive table-striped table-hover mb-3">
+                        <thead>
+                            <tr>
+                              <th scope="col-md-2">#</th>
+                              <th scope="col-md-4">Name</th>
+                              <th scope="col-md-2">Quanty</th>
+                              <th class="col-md-4 text-end">Price</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let detail of orderDetails ;let indice=index">
+                                
+                                <th class="col-md-2">{{indice+1}}</th>
+                                <td class="col-md-4">{{getProductName(detail.productId)}}</td>
+                                <td class="col-md-2"><input type="number" class="form-control" min="1" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))" [value]="detail.quantity" (change)='onChangeQuantity(detail.productId, $event)'/></td>
+                                <td class="col-md-4 text-end">$ {{detail.total}}</td>
+                              </tr>
+                          </tbody>
+                          <br>
+                          <br>
+                          <tfoot>
+                            <th></th>
+                            <th></th>
+                            <th>Subtotal: ${{subtotalOrder}}</th>
+                            <th>Total: ${{totalOrder | number : '1.2-2'}}</th> 
+                        </tfoot>
+                    </table>
+                    <div class="col-md-12 mb-3">
+                        <a  class="btn btn-outline-primary shadow-sm rounded" tabindex="-1" role="button" aria-disabled="true" (click)="addOrderAndOrderDetails(orderNumber, subtotalOrder, totalOrder, orderDetails)"> <i class="bi bi-check-all"> </i>  Created Order</a>
+                    </div> 
+                </div>
+                
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="shadow-lg p-3 mb-5 rounded">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="Pending-tab" data-bs-toggle="tab" data-bs-target="#Pending-tab-pane" type="button" role="tab" aria-controls="Pending-tab-pane" aria-selected="true" (click)="getListOrder(0)">Pending</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="InProces-tab" data-bs-toggle="tab" data-bs-target="#InProces-tab-pane" type="button" role="tab" aria-controls="InProces-tab-pane" aria-selected="false" (click)="getListOrder(1)">In Process</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="Completed-tab" data-bs-toggle="tab" data-bs-target="#Completed-tab-pane" type="button" role="tab" aria-controls="Completed-tab-pane" aria-selected="false" (click)="getListOrder(2)">Completed</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="Delivered-tab" data-bs-toggle="tab" data-bs-target="#Delivered-tab-pane" type="button" role="tab" aria-controls="Delivered-tab-pane" aria-selected="false" (click)="getListOrder(3)">Delivered</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="Canceled-tab" data-bs-toggle="tab" data-bs-target="#Canceled-tab-pane" type="button" role="tab" aria-controls="Canceled-tab-pane" aria-selected="false" (click)="getListOrder(4)">Canceled</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="Products-tab" data-bs-toggle="tab" data-bs-target="#Products-tab-pane" type="button" role="tab" aria-controls="Products-tab-pane" aria-selected="false" (click)="getListProducts()">Products List</button>
+        </li>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="Pending-tab-pane" role="tabpanel" aria-labelledby="Pending-tab" tabindex="0">
+            <br>
+            <br>
+            <div class="row g-3" *ngIf="success else messageInfo" >
+                <div class="col-12 col-md-6" *ngFor="let order of orderDetail">
+                    <div class="card shadow p-3 mb-5 rounded"  >
+                        <div class="card-header"> 
+                            <div class="row justify-content-evenly">
+                                <div class="col-md-6 text-start">
+                                    <strong> Order #{{order.orderNumber}}</strong>
+                                  </div>
+                                  <div class="col-md-6 text-end">
+                                    <span class="badge text-bg-secondary">{{order.orderStatusTypeName}}</span>
+                                  </div>     
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <br>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p> <strong>PRODUCTS</strong></p>
+                                        <table class="table table-striped">
+                                            <thead class="">
+                                                <th>Name</th>
+                                                <th>Cantidad</th>
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end">
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="bi bi-list-ul"> </i> Seleccionar
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,1)"> <i class="bi bi-play-fill"> </i> In Process</a></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,2)"> <i class="bi bi-check-lg"> </i> Completed</a></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,3)"> <i class="bi bi-pin-map-fill"> </i> Delivered</a></li>
+                                                          <li><hr class="dropdown-divider"></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,4)"> <i class="bi bi-trash3-fill"> </i> Canceled</a></li>
+                                                        </ul>
+                                                      </div>
+                                                </th>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let orderDetails of order.orderDetails">
+                                                    <td>{{orderDetails.product.name}}</td>
+                                                    <td>{{orderDetails.quantity}}</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <th>Subtotal: $ {{order.subTotal}} </th>
+                                                <th>Total: $ {{order.total}} </th> 
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end"><button type="button" class="btn btn-outline-danger shadow-sm rounded"> <i class="bi bi-trash3-fill"> </i> Cancelar </button></th>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                        </div>
+                      </div>
+                </div>           
+            </div>
+
+            <ng-template #messageInfo>
+                <div class="alert alert-danger" role="alert">
+                    {{messageError}} 
+                </div>
+            </ng-template>
+        </div>
+        <div class="tab-pane fade" id="InProces-tab-pane" role="tabpanel" aria-labelledby="InProces-tab" tabindex="0">
+            <br>
+            <br>
+            <div class="row g-3" *ngIf="success else messageInfo" >
+                <div class="col-12 col-md-6" *ngFor="let order of orderDetail">
+                    <div class="card shadow p-3 mb-5 rounded"  >
+                        <div class="card-header"> 
+                            <div class="row justify-content-evenly">
+                                <div class="col-md-6 text-start">
+                                    <strong> Order #{{order.orderNumber}}</strong>
+                                  </div>
+                                  <div class="col-md-6 text-end">
+                                    <span class="badge text-bg-primary">{{order.orderStatusTypeName}}</span>
+                                  </div>     
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <br>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p> <strong>PRODUCTS</strong></p>
+                                        <table class="table table-striped">
+                                            <thead class="">
+                                                <th>Name</th>
+                                                <th>Cantidad</th>
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end">
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="bi bi-list-ul"> </i> Seleccionar
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,0)"> <i class="bi bi-play-fill"> </i> Pending</a></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,2)"> <i class="bi bi-check-lg"> </i> Completed</a></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,3)"> <i class="bi bi-pin-map-fill"> </i> Delivered</a></li>
+                                                          <li><hr class="dropdown-divider"></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,4)"> <i class="bi bi-trash3-fill"> </i> Canceled</a></li>
+                                                        </ul>
+                                                      </div>
+                                                </th>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let orderDetails of order.orderDetails">
+                                                    <td>{{orderDetails.product.name}}</td>
+                                                    <td>{{orderDetails.quantity}}</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <th>Subtotal: $ {{order.subTotal}} </th>
+                                                <th>Total: $ {{order.total}} </th> 
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end"><button type="button" class="btn btn-outline-danger shadow-sm rounded"> <i class="bi bi-trash3-fill"> </i> Cancelar </button></th>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                        </div>
+                      </div>
+                </div>           
+            </div>
+
+            <ng-template #messageInfo>
+                <div class="alert alert-danger" role="alert">
+                    {{messageError}} 
+                </div>
+            </ng-template>
+
+        </div>
+        <div class="tab-pane fade" id="Completed-tab-pane" role="tabpanel" aria-labelledby="Completed-tab" tabindex="0">
+            <br>
+            <br>
+            <div class="row g-3" *ngIf="success else messageInfo" >
+                <div class="col-12 col-md-6" *ngFor="let order of orderDetail">
+                    <div class="card shadow p-3 mb-5 rounded"  >
+                        <div class="card-header"> 
+                            <div class="row justify-content-evenly">
+                                <div class="col-md-6 text-start">
+                                    <strong> Order #{{order.orderNumber}}</strong>
+                                  </div>
+                                  <div class="col-md-6 text-end">
+                                    <span class="badge text-bg-info">{{order.orderStatusTypeName}}</span>
+                                  </div>     
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <br>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p> <strong>PRODUCTS</strong></p>
+                                        <table class="table table-striped">
+                                            <thead class="">
+                                                <th>Name</th>
+                                                <th>Cantidad</th>
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end">
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="bi bi-list-ul"> </i> Seleccionar
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,0)"> <i class="bi bi-play-fill"> </i> Pending</a></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,1)"> <i class="bi bi-play-fill"> </i> In Process</a></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,3)"> <i class="bi bi-pin-map-fill"> </i> Delivered</a></li>
+                                                          <li><hr class="dropdown-divider"></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,4)"> <i class="bi bi-trash3-fill"> </i> Canceled</a></li>
+                                                        </ul>
+                                                      </div>
+                                                </th>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let orderDetails of order.orderDetails">
+                                                    <td>{{orderDetails.product.name}}</td>
+                                                    <td>{{orderDetails.quantity}}</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <th>Subtotal: $ {{order.subTotal}} </th>
+                                                <th>Total: $ {{order.total}} </th> 
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end"><button type="button" class="btn btn-outline-danger shadow-sm rounded"> <i class="bi bi-trash3-fill"> </i> Cancelar </button></th>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                        </div>
+                      </div>
+                </div>           
+            </div>
+
+            <ng-template #messageInfo>
+                <div class="alert alert-danger" role="alert">
+                    {{messageError}} 
+                </div>
+            </ng-template>
+
+        </div>
+        <div class="tab-pane fade" id="Delivered-tab-pane" role="tabpanel" aria-labelledby="Delivered-tab" tabindex="0">
+            <br>
+            <br>
+            <div class="row g-3" *ngIf="success else messageInfo" >
+                <div class="col-12 col-md-6" *ngFor="let order of orderDetail">
+                    <div class="card shadow p-3 mb-5 rounded"  >
+                        <div class="card-header"> 
+                            <div class="row justify-content-evenly">
+                                <div class="col-md-6 text-start">
+                                    <strong> Order #{{order.orderNumber}}</strong>
+                                  </div>
+                                  <div class="col-md-6 text-end">
+                                    <span class="badge text-bg-success">{{order.orderStatusTypeName}}</span>
+                                  </div>     
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <br>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p> <strong>PRODUCTS</strong></p>
+                                        <table class="table table-striped">
+                                            <thead class="">
+                                                <th>Name</th>
+                                                <th>Cantidad</th>
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end">
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="bi bi-list-ul"> </i> Seleccionar
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,0)"> <i class="bi bi-play-fill"> </i> Pending</a></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,1)"> <i class="bi bi-play-fill"> </i> In Process</a></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,2)"> <i class="bi bi-check-lg"> </i> Completed</a></li>
+                                                          
+                                                          <li><hr class="dropdown-divider"></li>
+                                                          <li><a class="dropdown-item" (click)="updateOrderStatusType(order.id,4)"> <i class="bi bi-trash3-fill"> </i> Canceled</a></li>
+                                                        </ul>
+                                                      </div>
+                                                </th>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let orderDetails of order.orderDetails">
+                                                    <td>{{orderDetails.product.name}}</td>
+                                                    <td>{{orderDetails.quantity}}</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <th>Subtotal: $ {{order.subTotal}} </th>
+                                                <th>Total: $ {{order.total}} </th> 
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end"><button type="button" class="btn btn-outline-danger shadow-sm rounded"> <i class="bi bi-trash3-fill"> </i> Cancelar </button></th>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                        </div>
+                      </div>
+                </div>           
+            </div>
+
+            <ng-template #messageInfo>
+                <div class="alert alert-danger" role="alert">
+                    {{messageError}} 
+                </div>
+            </ng-template>
+        </div>
+        <div class="tab-pane fade" id="Canceled-tab-pane" role="tabpanel" aria-labelledby="Canceled-tab" tabindex="0">
+            <br>
+            <br>
+            <div class="row g-3" *ngIf="success else messageInfo" >
+                <div class="col-12 col-md-6" *ngFor="let order of orderDetail">
+                    <div class="card shadow p-3 mb-5 rounded"  >
+                        <div class="card-header"> 
+                            <div class="row justify-content-evenly">
+                                <div class="col-md-6 text-start">
+                                    <strong> Order #{{order.orderNumber}}</strong>
+                                  </div>
+                                  <div class="col-md-6 text-end">
+                                    <span class="badge text-bg-danger">{{order.orderStatusTypeName}}</span>
+                                  </div>     
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <br>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p> <strong>PRODUCTS</strong></p>
+                                        <table class="table table-striped">
+                                            <thead class="">
+                                                <th>Name</th>
+                                                <th>Cantidad</th>
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end">
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" hidden="true" disable>
+                                                            <i class="bi bi-list-ul"> </i> Seleccionar
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                          <li><a class="dropdown-item" href="#"> <i class="bi bi-play-fill"> </i> In Process</a></li>
+                                                          <li><a class="dropdown-item" href="#"> <i class="bi bi-check-lg"> </i> Completed</a></li>
+                                                          <li><a class="dropdown-item" href="#"> <i class="bi bi-pin-map-fill"> </i> Delivered</a></li>
+                                                          <li><hr class="dropdown-divider"></li>
+                                                          <li><a class="dropdown-item" href="#"> <i class="bi bi-trash3-fill"> </i> Canceled</a></li>
+                                                        </ul>
+                                                      </div>
+                                                </th>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let orderDetails of order.orderDetails">
+                                                    <td>{{orderDetails.product.name}}</td>
+                                                    <td>{{orderDetails.quantity}}</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <th>Subtotal: $ {{order.subTotal}} </th>
+                                                <th>Total: $ {{order.total}} </th> 
+                                                <th></th>
+                                                <th></th>
+                                                <th class="text-end"><button type="button" class="btn btn-outline-danger shadow-sm rounded" hidden="true" disabled> <i class="bi bi-trash3-fill"> </i> Cancelar </button></th>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                        </div>
+                      </div>
+                </div>           
+            </div>
+
+            <ng-template #messageInfo>
+                <div class="alert alert-danger" role="alert">
+                    {{messageError}} 
+                </div>
+            </ng-template>
+        </div>
+        <div class="tab-pane fade" id="Products-tab-pane" role="tabpanel" aria-labelledby="Products-tab" tabindex="0">
+            <br>
+            <br>
+           <table class="table table-striped">
+    <thead class="">
+        <th>Id</th>
+        <th>Name</th>
+        <th>Fecha Creacion</th>
+        <th>Cantidad</th>
+        <th>Iva</th>
+        <th>Precio</th>
+    </thead>
+    <tbody>
+       
+        <tr *ngFor="let product of productsList$!|async">
+            <td>{{product.id}}</td>
+            <td>{{product.name}}</td>
+            <td>{{product.dateCreated | date:'dd/MM/yyyy'}}</td>
+            <td>{{product.quantity}}</td>
+            <td>{{product.iva/100}} %</td>
+            <td>$ {{product.price}}</td>
+        </tr>
+    </tbody>
+    </table> 
+        </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Create Order</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          La orden se creo correctamente, Order #{{orderNumberNew}}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Ok!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<style>
+    .card-header{
+        background-color: rgb(255 255 255) !important;
+    }
+</style>
