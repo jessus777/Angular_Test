@@ -109,16 +109,46 @@ export class ShowOderComponent implements OnInit {
       const product = this.productExistents.find(p => p.name == valueSelect);
       if(product != null){
         
-        var orderDetail = {
-          orderId : this.orderNumberNew,
-          productId: product.id,
-          quantity: this.quantity,
-          subTotal: this.quantity * product.price,
-          total: this.quantity * product.price + (( this.quantity * product.price) * (product.iva/100))
-        };
-        this.subtotalOrder = this.subtotalOrder + orderDetail.subTotal; 
-        this.totalOrder = this.totalOrder + orderDetail.total;
-        this.orderDetails.push(orderDetail);
+        if(this.orderDetails.length > 0){
+            const detail = this.orderDetails.find(p => p.productId == product.id);
+            if(detail != null){
+              detail.quantity += 1;
+              detail.subTotal = detail.quantity * product.price;
+              detail.total =  detail.subTotal + ( detail.subTotal * product.iva/100);
+            }
+            else{
+              var orderDetail = {
+                orderId : this.orderNumberNew,
+                productId: product.id,
+                quantity: this.quantity,
+                subTotal: this.quantity * product.price,
+                total: this.quantity * product.price + (( this.quantity * product.price) * (product.iva/100))
+              };
+              //this.subtotalOrder = this.subtotalOrder + orderDetail.subTotal; 
+              //this.totalOrder = this.totalOrder + orderDetail.total;
+              this.orderDetails.push(orderDetail);
+            }
+            this.subtotalOrder = 0;
+            this.totalOrder  = 0;
+            this.orderDetails.forEach(element => {
+              this.subtotalOrder =  this.subtotalOrder + element.subTotal;
+              this.totalOrder =   this.totalOrder +  element.total;
+            });
+        }
+        else{
+          var orderDetail = {
+            orderId : this.orderNumberNew,
+            productId: product.id,
+            quantity: this.quantity,
+            subTotal: this.quantity * product.price,
+            total: this.quantity * product.price + (( this.quantity * product.price) * (product.iva/100))
+          };
+          this.subtotalOrder = this.subtotalOrder + orderDetail.subTotal; 
+          this.totalOrder = this.totalOrder + orderDetail.total;
+          this.orderDetails.push(orderDetail);
+        }
+
+        
       }
       console.log(this.subtotalOrder);
       console.log(product);
